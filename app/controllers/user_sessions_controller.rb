@@ -1,11 +1,13 @@
 class UserSessionsController < ApplicationController
+  skip_before_filter :require_login, :except => [:destroy]
+
   def new
     @user = User.new
   end
 
   def create
     respond_to do |format|
-      if @user = login(params[:username],params[:password])
+      if @user = login(params[:email],params[:password])
         format.html { redirect_back_or_to(:users, :notice => 'Login successful.') }
         format.xml { render :xml => @user, :status => :created, :location => @user }
       else
