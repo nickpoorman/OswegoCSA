@@ -1,0 +1,5 @@
+h1. OswegoCSA
+
+h2. Alumni network project
+
+Ruby on Rails Saturday Sp' 2012
