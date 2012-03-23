@@ -13,3 +13,14 @@
 # Ignore all logfiles and tempfiles.
 /log/*.log
 /tmp
+
+# ignore swapfiles logs tmp etc
+.bundle
+db/*.sqlite3
+log/*.log
+tmp/
+*~
+*.sw?
+*.swp
+tmp/**/*
+
