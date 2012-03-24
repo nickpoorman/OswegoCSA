@@ -1,0 +1,164 @@
+### Terminal ###
+rails new projname
+git init
+
+$GOTO: Sorcery
+bundle install
+rails generate sorcery:install remember_me
+rake db:migrate
+rails g scaffold User
+rm -rf db/migrate/*_create_users.rb
+rails g controller UserSessions new create destroy
+
+
+rails g scaffold product name price:decimal --skip-stylesheets
+rake db:migrate
+
+$GOTO: Add bootstrap asset
+bundle install
+rails g bootstrap:install
+rails g bootstrap:themed products -f
+
+
+
+
+$$$ Twitter Bootstrap $$$
+
+### Gemfile ###
+group :assets do
+  gem 'twitter-bootstrap-rails', :git => 'git://github.com/seyhunak/twitter-bootstrap-rails.git'
+end
+
+### app/assets/stylesheets/bootstrap_and_override.css.less ###
+
+@import "twitter/bootstrap/bootstrap";
+
+body { padding-top: 60px; }
+
+@import "twitter/bootstrap/responsive";
+
+
+
+
+
+$$$ Sorcery $$$
+https://github.com/NoamB/sorcery
+
+### Gemfile ###
+
+gem "sorcery"
+
+
+### config/initializers/sorcery.rb ###
+
+Rails.application.config.sorcery.submodules = [:remember_me]
+
+# . . .
+
+    user.username_attribute_name = :email
+
+
+### models/user.rb ###
+
+class User < ActiveRecord::Base
+  authenticates_with_sorcery!
+  
+  attr_accessible :email, :password, :password_confirmation
+
+  validates_confirmation_of :password
+  validates_presence_of :password, :on => :create
+  validates_presence_of :email
+  validates_uniqueness_of :email
+end
+
+### app/controllers/user_sessions_controller.rb ###
+class UserSessionsController < ApplicationController
+  def new
+    @user = User.new
+  end
+  
+  def create
+    respond_to do |format|
+      if @user = login(params[:email],params[:password])
+        format.html { redirect_back_or_to(:users, :notice => 'Login successful.') }
+        format.xml { render :xml => @user, :status => :created, :location => @user }
+      else
+        format.html { flash.now[:alert] = "Login failed."; render :action => "new" }
+        format.xml { render :xml => @user.errors, :status => :unprocessable_entity }
+      end
+    end
+  end
+    
+  def destroy
+    logout
+    redirect_to(:users, :notice => 'Logged out!')
+  end
+end
+
+
+### views/users/new.html.erb ###
+
+<%= form_for @user do |f| %>
+  <% if @user.errors.any? %>
+    <div class="error_messages">
+      <h2>Form is invalid</h2>
+      <ul>
+        <% for message in @user.errors.full_messages %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <div class="field">
+    <%= f.label :email %>
+    <%= f.text_field :email %>
+  </div>
+  <div class="field">
+    <%= f.label :password %>
+    <%= f.password_field :password %>
+  </div>
+  <div class="field">
+    <%= f.label :password_confirmation %>
+    <%= f.password_field :password_confirmation %>
+  </div>
+  <div class="actions"><%= f.submit %></div>
+<% end %>
+
+
+### views/user_sessions/_form.html.erb ###
+
+<h1>Login</h1>
+
+<%= render 'form' %>
+
+
+### views/user_sessions/_form.html.erb ###
+
+<%= form_tag user_sessions_path, :method => :post do %>
+    <div class="field">
+      <%= label_tag :email %>
+      <%= text_field_tag :email %>
+    </div>
+    <div class="field">
+      <%= label_tag :password %>
+      <%= password_field_tag :password %>
+    </div>
+    <div class="field">
+      <%= check_box_tag :remember_me, 1, params[:remember_me] %>
+      <%= label_tag :remember_me %>
+    </div>
+    <div class="actions">
+      <%= submit_tag "Login" %>
+    </div>
+  <% end %>
+
+
+
+
+
+
+
+
+
+
+
